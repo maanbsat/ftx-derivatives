@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use futures::future::try_join_all;
 use serde::de::DeserializeOwned;
 use thiserror::Error;
-use futures::future::try_join_all;
 
 pub mod structs;
 
@@ -92,7 +92,10 @@ impl FTXDerivatives {
         &self,
         contract_ids: &[u64],
     ) -> Result<HashMap<u64, ContractTicker>, FTXDerivativesError> {
-        let futs: Vec<_> = contract_ids.iter().map(|i| self.get_contract_ticker(*i)).collect();
+        let futs: Vec<_> = contract_ids
+            .iter()
+            .map(|i| self.get_contract_ticker(*i))
+            .collect();
         let res = try_join_all(futs).await?;
         Ok(contract_ids.iter().zip(res).map(|(x, y)| (*x, y)).collect())
     }
@@ -134,7 +137,10 @@ mod tests {
     async fn test_contracts_ticker() {
         dotenv().ok();
         let client = FTXDerivatives::new(&env::var("API_KEY").unwrap());
-        let ticker = client.get_contracts_ticker(&[22227601, 22229249]).await.unwrap();
+        let ticker = client
+            .get_contracts_ticker(&[22227601, 22229249])
+            .await
+            .unwrap();
         println!("{:#?}", ticker);
     }
 }
