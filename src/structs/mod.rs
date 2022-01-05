@@ -6,6 +6,7 @@ pub type DateTime = chrono::DateTime<chrono::Utc>;
 pub mod contract;
 pub mod positions;
 pub mod transaction;
+pub mod trade;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct ListMetaResult {

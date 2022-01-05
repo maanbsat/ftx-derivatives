@@ -8,8 +8,9 @@ use thiserror::Error;
 pub mod structs;
 
 use structs::{
-    contract::{Contract, ContractTicker, ContractTickerResult, ContractTickerLastTrade},
+    contract::{Contract, ContractTicker, ContractTickerLastTrade, ContractTickerResult},
     positions::Position,
+    trade::Trade,
     transaction::Transaction,
 };
 
@@ -118,20 +119,22 @@ impl FTXDerivatives {
         Ok(contract_ids.iter().zip(res).map(|(x, y)| (*x, y)).collect())
     }
 
+    pub async fn get_trades(&self) -> Result<Vec<Trade>, FTXDerivativesError> {
+        const URL: &str = "https://api.ledgerx.com/trading/trades";
+        let res: Vec<Trade> = self.get_list(URL).await?.data;
+
+        res.into_iter().map(|t| convert_trade(t)).collect()
+    }
+
     pub async fn get_balances(&self) -> Result<HashMap<String, Decimal>, FTXDerivativesError> {
         let txn = self.get_transactions().await?;
         let mut balances = HashMap::new();
 
         for t in txn {
-            let asset = match &t.asset[..] {
-                "CBTC" => "BTC".to_owned(),
-                _ => t.asset,
-            };
-
-            if balances.contains_key(&asset) {
-                *balances.get_mut(&asset).unwrap() += t.net_change;
+            if balances.contains_key(&t.asset) {
+                *balances.get_mut(&t.asset).unwrap() += t.net_change;
             } else {
-                balances.insert(asset.to_owned(), t.net_change);
+                balances.insert(t.asset.to_owned(), t.net_change);
             }
         }
 
@@ -175,7 +178,7 @@ fn convert_contract_ticker(ticker: ContractTicker) -> Result<ContractTicker, FTX
             price: rescale_number(t.price, 2)?,
             ..t
         }),
-        None => None
+        None => None,
     };
     Ok(ContractTicker {
         ask: rescale_number(ticker.ask, 2)?,
@@ -209,6 +212,16 @@ fn convert_transaction(transaction: Transaction) -> Result<Transaction, FTXDeriv
     })
 }
 
+fn convert_trade(trade: Trade) -> Result<Trade, FTXDerivativesError> {
+    Ok(Trade {
+        filled_price: rescale_number(trade.filled_price, 2)?,
+        fee: rescale_number(trade.fee, 2)?,
+        rebate: rescale_number(trade.rebate, 2)?,
+        premium: rescale_number(trade.premium, 2)?,
+        ..trade
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use std::env;
@@ -225,13 +238,21 @@ mod tests {
         println!("{:#?}", pos);
     }
 
-    // #[tokio::test]
-    // async fn test_transactions() {
-    //     dotenv().ok();
-    //     let client = FTXDerivatives::new(&env::var("API_KEY").unwrap());
-    //     let txn = client.get_transactions().await.unwrap();
-    //     println!("{:#?}", txn);
-    // }
+    #[tokio::test]
+    async fn test_transactions() {
+        dotenv().ok();
+        let client = FTXDerivatives::new(&env::var("API_KEY").unwrap());
+        let txn = client.get_transactions().await.unwrap();
+        println!("{:#?}", txn);
+    }
+
+    #[tokio::test]
+    async fn test_trades() {
+        dotenv().ok();
+        let client = FTXDerivatives::new(&env::var("API_KEY").unwrap());
+        let trades = client.get_trades().await.unwrap();
+        println!("{:#?}", trades);
+    }
 
     #[tokio::test]
     async fn test_contract_ticker() {
