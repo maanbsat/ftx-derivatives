@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use rust_decimal::Decimal;
 
 use super::DateTime;
 
@@ -20,7 +21,7 @@ pub struct Contract {
     pub id: u64,
     pub name: Option<String>,
     pub is_call: bool,
-    pub strike_price: u64,
+    pub strike_price: Decimal,
     pub min_increment: u32,
     pub date_live: DateTime,
     pub date_expires: DateTime,
@@ -44,8 +45,8 @@ pub struct ContractTickerResult {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct ContractTicker {
-    pub ask: u32,
-    pub bid: u32,
+    pub ask: Decimal,
+    pub bid: Decimal,
     pub volume_24h: u32,
     pub last_trade: Option<ContractTickerLastTrade>,
     pub time: DateTime,
@@ -54,7 +55,7 @@ pub struct ContractTicker {
 #[derive(Deserialize, Debug, Clone)]
 pub struct ContractTickerLastTrade {
     pub id: u64,
-    pub price: u32,
+    pub price: Decimal,
     pub size: u32,
     pub time: DateTime,
 }
