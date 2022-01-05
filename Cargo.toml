@@ -10,6 +10,7 @@ serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 thiserror = "1.0"
 futures = "0.3"
+rust_decimal = { version = "1.15", features = ["serde-float"] }
 
 [dev-dependencies]
 dotenv = "0.15"

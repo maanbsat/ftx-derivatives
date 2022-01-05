@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use super::DateTime;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")] 
 pub enum TransactionType {
     FeeTransaction,
@@ -12,7 +12,7 @@ pub enum TransactionType {
     DepositTransaction,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")] 
 pub enum TransactionState {
     Pending,
@@ -21,7 +21,7 @@ pub enum TransactionState {
     Failed,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Transaction {
     pub id: u64,
     pub created: DateTime,

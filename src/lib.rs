@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use futures::future::try_join_all;
+use rust_decimal::Decimal;
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 
@@ -24,6 +25,13 @@ pub enum FTXDerivativesError {
         #[from]
         source: serde_json::Error,
     },
+    #[error("error caught in decimal processing")]
+    DecimalError {
+        #[from]
+        source: rust_decimal::Error,
+    },
+    #[error("unknown currency")]
+    UnknownCurrency { currency: String },
 }
 
 pub struct FTXDerivatives {
@@ -99,6 +107,40 @@ impl FTXDerivatives {
         let res = try_join_all(futs).await?;
         Ok(contract_ids.iter().zip(res).map(|(x, y)| (*x, y)).collect())
     }
+
+    pub async fn get_balances(&self) -> Result<HashMap<String, Decimal>, FTXDerivativesError> {
+        let txn = self.get_transactions().await?;
+        let mut balances = HashMap::new();
+
+        for t in txn {
+            let net_change = convert_amount(t.net_change, t.asset.clone())?;
+
+            if balances.contains_key(&t.asset) {
+                *balances.get_mut(&t.asset).unwrap() += net_change;
+            } else {
+                balances.insert(t.asset.to_owned(), net_change);
+            }
+        }
+
+        return Ok(balances);
+    }
+}
+
+fn convert_amount<'a>(raw_amount: i32, currency: String) -> Result<Decimal, FTXDerivativesError> {
+    let num_decimals = match &currency[..] {
+        "USD" => 2,
+        "CBTC" => 8,
+        "ETH" => 8,
+        _ => {
+            return Err(FTXDerivativesError::UnknownCurrency {
+                currency: currency.clone(),
+            })
+        }
+    };
+
+    let mut res = Decimal::from(raw_amount);
+    res.set_scale(num_decimals)?;
+    Ok(res)
 }
 
 #[cfg(test)]
@@ -142,5 +184,13 @@ mod tests {
             .await
             .unwrap();
         println!("{:#?}", ticker);
+    }
+
+    #[tokio::test]
+    async fn test_balances() {
+        dotenv().ok();
+        let client = FTXDerivatives::new(&env::var("API_KEY").unwrap());
+        let balances = client.get_balances().await.unwrap();
+        println!("{:#?}", balances);
     }
 }

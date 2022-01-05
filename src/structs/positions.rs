@@ -2,14 +2,14 @@ use serde::Deserialize;
 
 use super::contract::Contract;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")] 
 pub enum PositionType {
     Long,
     Short,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Position {
     pub id: u64,
     pub size: i32,

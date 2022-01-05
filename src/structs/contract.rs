@@ -2,20 +2,20 @@ use serde::Deserialize;
 
 use super::DateTime;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum DerivativeType {
     OptionsContract,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum OptionType {
     Call,
     Put,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Contract {
     pub id: u64,
     pub name: Option<String>,
@@ -37,12 +37,12 @@ pub struct Contract {
     pub option_type: OptionType,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ContractTickerResult {
     pub data: ContractTicker,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ContractTicker {
     pub ask: u32,
     pub bid: u32,
@@ -51,7 +51,7 @@ pub struct ContractTicker {
     pub time: DateTime,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ContractTickerLastTrade {
     pub id: u64,
     pub price: u32,

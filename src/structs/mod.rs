@@ -7,7 +7,7 @@ pub mod contract;
 pub mod positions;
 pub mod transaction;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ListMetaResult {
     pub total_count: u32,
     pub next: Option<String>,
@@ -16,7 +16,7 @@ pub struct ListMetaResult {
     pub offset: u32,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ListResult<T> {
     pub meta: ListMetaResult,
     pub data: T,
