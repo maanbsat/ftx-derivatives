@@ -1,7 +1,7 @@
 # ftx-derivatives
 Rust library for [FTX Derivatives](https://derivs.ftx.us/) (previously LedgerX) API access
 
-API reference: https://derivs.ftx.us/
+API reference: https://docs.ledgerx.com/reference/overview
 
 Work in progress
 
