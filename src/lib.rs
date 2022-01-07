@@ -1,3 +1,5 @@
+//! Library for FTX Derivatives (previously LedgerX) API access
+
 use std::collections::HashMap;
 
 use futures::future::try_join_all;
@@ -85,7 +87,7 @@ impl FTXDerivatives {
         const URL: &str = "https://api.ledgerx.com/funds/transactions";
         let res: Vec<Transaction> = self.get_list(URL).await?.data;
 
-        res.into_iter().map(|t| convert_transaction(t)).collect()
+        res.into_iter().map(convert_transaction).collect()
     }
 
     pub async fn get_contract_ticker(
@@ -123,7 +125,7 @@ impl FTXDerivatives {
         const URL: &str = "https://api.ledgerx.com/trading/trades";
         let res: Vec<Trade> = self.get_list(URL).await?.data;
 
-        res.into_iter().map(|t| convert_trade(t)).collect()
+        res.into_iter().map(convert_trade).collect()
     }
 
     pub async fn get_balances(&self) -> Result<HashMap<String, Decimal>, FTXDerivativesError> {
@@ -138,7 +140,7 @@ impl FTXDerivatives {
             }
         }
 
-        return Ok(balances);
+        Ok(balances)
     }
 }
 
@@ -156,14 +158,10 @@ fn get_num_decimals(currency: &str) -> Result<u32, FTXDerivativesError> {
 }
 
 fn rescale_number(amount: Decimal, num_decimals: u32) -> Result<Decimal, FTXDerivativesError> {
-    let mut res = amount.clone();
+    let mut res = amount;
     res.set_scale(num_decimals)?;
     Ok(res)
 }
-
-// fn rescale_amount(amount: Decimal, currency: &str) -> Result<Decimal, FTXDerivativesError> {
-//     rescale_number(amount, get_num_decimals(currency)?)
-// }
 
 fn convert_contract(contract: Contract) -> Result<Contract, FTXDerivativesError> {
     Ok(Contract {
