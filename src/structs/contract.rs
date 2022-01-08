@@ -28,7 +28,7 @@ pub struct Contract {
     pub date_exercise: DateTime,
     pub derivative_type: DerivativeType,
     pub open_interest: u64,
-    pub multiplier: u32,
+    pub multiplier: Decimal,
     pub label: String,
     pub active: bool,
     pub is_next_day: bool,
