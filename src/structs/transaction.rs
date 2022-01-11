@@ -11,6 +11,8 @@ pub enum TransactionType {
     ReleasePositionLockTransaction,
     PremiumTransaction,
     DepositTransaction,
+    WithdrawalTransaction,
+    WithdrawalLockTransaction
 }
 
 #[derive(Deserialize, Debug, Clone)]
