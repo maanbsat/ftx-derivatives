@@ -54,9 +54,11 @@ impl FTXDerivatives {
         &self,
         url: &str,
     ) -> Result<structs::ListResult<T>, FTXDerivativesError> {
+        // TODO: implement paging
         let res = self
             .reqwest_client
             .get(url)
+            .query(&[("limit", 100)])
             .header("Authorization", format!("JWT {}", &self.api_key))
             .send()
             .await?
