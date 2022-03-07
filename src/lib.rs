@@ -166,10 +166,42 @@ fn rescale_number(amount: Decimal, num_decimals: u32) -> Result<Decimal, FTXDeri
 }
 
 fn convert_contract(contract: Contract) -> Result<Contract, FTXDerivativesError> {
-    Ok(Contract {
-        strike_price: rescale_number(contract.strike_price, 2)?,
-        ..contract
-    })
+    match contract {
+        Contract::Option {
+            id,
+            name,
+            is_call,
+            strike_price,
+            min_increment,
+            date_live,
+            date_expires,
+            date_exercise,
+            open_interest,
+            multiplier,
+            label,
+            active,
+            underlying_asset,
+            collateral_asset,
+            option_type,
+        } => Ok(Contract::Option {
+            id,
+            name,
+            is_call,
+            strike_price: rescale_number(strike_price, 2)?,
+            min_increment,
+            date_live,
+            date_expires,
+            date_exercise,
+            open_interest,
+            multiplier,
+            label,
+            active,
+            underlying_asset,
+            collateral_asset,
+            option_type,
+        }),
+        x => Ok(x),
+    }
 }
 
 fn convert_contract_ticker(ticker: ContractTicker) -> Result<ContractTicker, FTXDerivativesError> {
@@ -258,7 +290,7 @@ mod tests {
     async fn test_contract_ticker() {
         dotenv().ok();
         let client = FTXDerivatives::new(&env::var("API_KEY").unwrap());
-        let ticker = client.get_contract_ticker(22227601).await.unwrap();
+        let ticker = client.get_contract_ticker(22212774).await.unwrap();
         println!("{:#?}", ticker);
     }
 
@@ -267,7 +299,7 @@ mod tests {
         dotenv().ok();
         let client = FTXDerivatives::new(&env::var("API_KEY").unwrap());
         let ticker = client
-            .get_contracts_ticker(&[22227601, 22229249])
+            .get_contracts_ticker(&[22212774, 22210648])
             .await
             .unwrap();
         println!("{:#?}", ticker);
